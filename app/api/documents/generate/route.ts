@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const tool = await db.aITool.findFirst({ where: { id: toolId, orgId } })
     if (!tool) return NextResponse.json({ error: 'Tool not found' }, { status: 404 })
     const answers = await db.wizardAnswer.findMany({ where: { toolId } })
-    const answersMap = Object.fromEntries(answers.map(a => [a.questionKey, a.answer]))
+    const answersMap = Object.fromEntries(answers.map((a: { questionKey: string; answer: string }) => [a.questionKey, a.answer]))
     content = generateFRIA({ orgName: org.name, tool, wizardAnswers: answersMap })
   } else if (type === 'INVENTORY') {
     const tools = await db.aITool.findMany({ where: { orgId } })

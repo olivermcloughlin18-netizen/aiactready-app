@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { canAddStaff } from '@/lib/plan-limits'
 
-export async function POST(req: Request) {
+export async function POST() {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const orgId = (session.user as any).orgId
@@ -15,8 +15,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Staff limit reached' }, { status: 403 })
   }
 
-  const { email }: { email: string } = await req.json()
-  const inviteUrl = `${process.env.NEXTAUTH_URL}/auth/signin?callbackUrl=/training&email=${encodeURIComponent(email)}`
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://aiactready-app.vercel.app'
+  const inviteUrl = `${baseUrl}/auth/signup/employee?org=${orgId}`
 
   return NextResponse.json({ inviteUrl })
 }

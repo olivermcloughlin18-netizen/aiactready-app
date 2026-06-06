@@ -2,28 +2,22 @@
 import { useState } from 'react'
 
 export function InviteForm() {
-  const [email, setEmail] = useState('')
   const [inviteLink, setInviteLink] = useState('')
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function generateLink() {
     setLoading(true)
     setInviteLink('')
     setError('')
     setCopied(false)
-    const res = await fetch('/api/team/invite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
+    const res = await fetch('/api/team/invite', { method: 'POST' })
     if (!res.ok) {
       const data = await res.json()
       setError(data.error === 'Staff limit reached'
         ? "You've reached your staff limit. Upgrade to Growth to invite more."
-        : 'Failed to generate invite.')
+        : 'Failed to generate invite link.')
     } else {
       const data = await res.json()
       setInviteLink(data.inviteUrl)
@@ -39,38 +33,38 @@ export function InviteForm() {
 
   return (
     <div>
-      <h2 className="text-xs font-medium text-[#52525b] uppercase tracking-widest mb-3">Invite staff</h2>
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="email"
-          placeholder="colleague@company.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-          className="flex-1 border border-[#e4e4e7] rounded-lg px-3 py-2.5 text-sm text-[#09090b] placeholder:text-[#a1a1aa] focus:outline-none focus:border-[#09090b] focus:shadow-[0_0_0_4px_rgba(9,9,11,0.06)] transition-all"
-        />
+      <h2 className="text-xs font-medium text-[#52525b] uppercase tracking-widest mb-1.5">Invite employees</h2>
+      <p className="text-xs text-[#a1a1aa] mb-3">Generate a link and share it with your team — anyone with the link can sign up as an employee.</p>
+
+      {!inviteLink ? (
         <button
-          type="submit"
+          onClick={generateLink}
           disabled={loading}
           className="bg-[#09090b] hover:bg-[#27272a] text-white rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 whitespace-nowrap transition-colors cursor-pointer"
         >
-          {loading ? 'Generating…' : 'Generate invite'}
+          {loading ? 'Generating…' : 'Generate invite link'}
         </button>
-      </form>
-      {inviteLink && (
-        <div className="mt-3 flex items-center gap-2">
-          <input
-            readOnly
-            value={inviteLink}
-            className="flex-1 border border-[#e4e4e7] rounded-lg px-3 py-2 text-xs text-[#52525b] bg-[#fafafa] truncate"
-          />
+      ) : (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={inviteLink}
+              className="flex-1 border border-[#e4e4e7] rounded-lg px-3 py-2 text-xs text-[#52525b] bg-[#fafafa] truncate"
+            />
+            <button
+              type="button"
+              onClick={copyLink}
+              className="shrink-0 border border-[#e4e4e7] hover:border-[#09090b] rounded-lg px-3 py-2 text-xs font-medium text-[#09090b] transition-colors cursor-pointer"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
           <button
-            type="button"
-            onClick={copyLink}
-            className="shrink-0 border border-[#e4e4e7] hover:border-[#09090b] rounded-lg px-3 py-2 text-xs font-medium text-[#09090b] transition-colors cursor-pointer"
+            onClick={() => { setInviteLink(''); setCopied(false) }}
+            className="text-xs text-[#52525b] hover:text-[#09090b] transition-colors cursor-pointer"
           >
-            {copied ? 'Copied!' : 'Copy'}
+            Generate new link
           </button>
         </div>
       )}

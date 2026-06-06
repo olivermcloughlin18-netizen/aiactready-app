@@ -34,12 +34,12 @@ export async function POST(req: Request) {
     frameworks,
     generatedAt: new Date(),
     tools,
-    documents: documents.map(d => ({
+    documents: documents.map((d: any) => ({
       title: d.title,
       type: d.type,
       content: d.content as { sections: { id: string; heading: string; content: string }[] },
     })),
-    assignments: assignments.map(a => ({
+    assignments: assignments.map((a: any) => ({
       userName: a.user.name ?? a.user.email,
       moduleTitle: a.module.title,
       completedAt: a.completedAt,
