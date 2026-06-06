@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY ?? 're_placeholder')
 
 export async function sendInviteEmail({ to, orgName, inviteUrl }: { to: string; orgName: string; inviteUrl: string }) {
   await resend.emails.send({
-    from: 'AIActReady <noreply@aiactready.com>',
+    from: 'AIActReady <onboarding@resend.dev>',
     to,
     subject: `You've been invited to complete AI literacy training at ${orgName}`,
     html: `
