@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { canAddStaff } from '@/lib/plan-limits'
-import { sendInviteEmail } from '@/lib/email/invite'
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -19,6 +18,5 @@ export async function POST(req: Request) {
   const { email }: { email: string } = await req.json()
   const inviteUrl = `${process.env.NEXTAUTH_URL}/auth/signin?callbackUrl=/training&email=${encodeURIComponent(email)}`
 
-  await sendInviteEmail({ to: email, orgName: org!.name, inviteUrl })
-  return NextResponse.json({ sent: true })
+  return NextResponse.json({ inviteUrl })
 }
