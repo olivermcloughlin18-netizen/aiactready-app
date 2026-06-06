@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organisation {
+  id                   String     @id @default(cuid())
+  name                 String
+  plan                 String     @default("starter")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  createdAt            DateTime   @default(now())
+  users                User[]
+  tools                AITool[]
+  documents            Document[]
+}
+
+model User {
+  id             String               @id @default(cuid())
+  orgId          String
+  email          String               @unique
+  name           String?
+  role           String               @default("staff")
+  hashedPassword String?
+  emailVerified  DateTime?
+  createdAt      DateTime             @default(now())
+  org            Organisation         @relation(fields: [orgId], references: [id])
+  assignments    TrainingAssignment[]
+  accounts       Account[]
+  sessions       Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model AITool {
+  id              String         @id @default(cuid())
+  orgId           String
+  name            String
+  vendor          String?
+  purpose         String?
+  department      String?
+  usersAffected   String?
+  dataProcessed   String?
+  isProduct       Boolean        @default(false)
+  riskClass       String?
+  wizardCompleted Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  org             Organisation   @relation(fields: [orgId], references: [id])
+  wizardAnswers   WizardAnswer[]
+  documents       Document[]
+}
+
+model WizardAnswer {
+  id          String @id @default(cuid())
+  toolId      String
+  questionKey String
+  answer      String
+  tool        AITool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id        String       @id @default(cuid())
+  orgId     String
+  toolId    String?
+  type      String
+  title     String
+  content   Json
+  status    String       @default("draft")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  org       Organisation @relation(fields: [orgId], references: [id])
+  tool      AITool?      @relation(fields: [toolId], references: [id])
+}
+
+model TrainingModule {
+  id            String               @id @default(cuid())
+  title         String               @unique
+  description   String
+  estimatedMins Int
+  content       Json
+  order         Int
+  assignments   TrainingAssignment[]
+}
+
+model TrainingAssignment {
+  id          String          @id @default(cuid())
+  userId      String
+  moduleId    String
+  assignedBy  String
+  assignedAt  DateTime        @default(now())
+  completedAt DateTime?
+  quizScore   Int?
+  user        User            @relation(fields: [userId], references: [id])
+  module      TrainingModule  @relation(fields: [moduleId], references: [id])
+
+  @@unique([userId, moduleId])
+}
